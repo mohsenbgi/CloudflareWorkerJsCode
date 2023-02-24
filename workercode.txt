@@ -14,8 +14,10 @@ export default {
     let resp_ips = await fetch(best_ips);
     let all_ips = ''
     let clean_ips = await resp_ips.text();
+    
     clean_ips = clean_ips.split('\n');
     clean_ips.pop()
+
     for (let ip_info of clean_ips) {
       let info = ip_info.split(' ')
       let clean_ip = info[0].trim()
@@ -29,9 +31,11 @@ export default {
         }
       }
     }
+    
     let ips = operator_to_ips[operator.toLowerCase()]? operator_to_ips[operator.toLowerCase()]: all_ips
     ips = ips.split('\n');
     ips.pop()
+
     if (url.pathname.startsWith('/sub')) {
       let newConfigs = '';
       let resp = await fetch(subLink);
@@ -70,13 +74,22 @@ export default {
       }
       return new Response(btoa(newConfigs));
     } else {
-        const url = new URL(request.url);
-        let realhostname = url.pathname.split('/')[2];
-        let realpathname = url.pathname.split('/')[1];
-        url.hostname = realhostname;
-        url.pathname = '/'+ realpathname;
-        url.protocol = "https";
-        return fetch(new Request(url, request));
+          let url = new URL(request.url);
+          let realhostname = url.pathname.split('/')[2];
+          let realpathname = url.pathname.split('/')[1];
+          if(realhostname.includes("v2ray")){
+            url.hostname = realhostname;
+            url.pathname = '/'+ realpathname;
+          }
+          else{
+            let splitted = url.pathname.replace(/^\/*/, '').split('/');
+            let address = splitted[0];
+            url.hostname = address;
+            url.pathname = splitted.slice(1).join('/');
+          }
+          
+          url.protocol = "https";
+          return fetch(new Request(url, request));
     }
   }
 };
