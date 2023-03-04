@@ -8,35 +8,34 @@ const useragents = ['chrome', 'firefox', 'safari', 'random', 'randomized']
 export default {
   async fetch(request) {
     let url = new URL(request.url);
-    let realhostname = url.pathname.split('/')[1];
-    let operator = url.pathname.split('/')[2]
-    let realpathname = url.pathname.split('/')[3];
-    let resp_ips = await fetch(best_ips);
-    let all_ips = ''
-    let clean_ips = await resp_ips.text();
-    
-    clean_ips = clean_ips.split('\n');
-    clean_ips.pop()
+    if (url.pathname.startsWith('/sub')) {
+      let realhostname = url.pathname.split('/')[1];
+      let operator = url.pathname.split('/')[2]
+      let realpathname = url.pathname.split('/')[3];
+      let resp_ips = await fetch(best_ips);
+      let all_ips = ''
+      let clean_ips = await resp_ips.text();
+      
+      clean_ips = clean_ips.split('\n');
+      clean_ips.pop()
 
-    for (let ip_info of clean_ips) {
-      let info = ip_info.split(' ')
-      let clean_ip = info[0].trim()
-      all_ips = all_ips + clean_ip + '\n'
-      let operators = info.slice(4)
-      for (let op of operators){
-        if (operator_to_ips[op.toLowerCase()] == undefined){
-          operator_to_ips[op.toLowerCase()] = []
-        } else {
-          operator_to_ips[op.toLowerCase()] +=  clean_ip + '\n'
+      for (let ip_info of clean_ips) {
+        let info = ip_info.split(' ')
+        let clean_ip = info[0].trim()
+        all_ips = all_ips + clean_ip + '\n'
+        let operators = info.slice(4)
+        for (let op of operators){
+          if (operator_to_ips[op.toLowerCase()] == undefined){
+            operator_to_ips[op.toLowerCase()] = []
+          } else {
+            operator_to_ips[op.toLowerCase()] +=  clean_ip + '\n'
+          }
         }
       }
-    }
-    
-    let ips = operator_to_ips[operator.toLowerCase()]? operator_to_ips[operator.toLowerCase()]: all_ips
-    ips = ips.split('\n');
-    ips.pop()
-
-    if (url.pathname.startsWith('/sub')) {
+      
+      let ips = operator_to_ips[operator.toLowerCase()]? operator_to_ips[operator.toLowerCase()]: all_ips
+      ips = ips.split('\n');
+      ips.pop()
       let newConfigs = '';
       let resp = await fetch(subLink);
       let subConfigs = await resp.text();
